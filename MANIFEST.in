@@ -1,0 +1,7 @@
+# https://docs.python.org/3/distutils/sourcedist.html#manifest
+include README.rst CHANGES LICENSE
+recursive-include requirements *.txt
+recursive-include openapi_type
+recursive-include openapi_type py.typed
+exclude requirements/test.txt
+prune tests
