@@ -3,7 +3,9 @@ from enum import Enum
 from typing import Literal, NewType
 from typing import Mapping
 from typing import Any, NamedTuple, Optional, Sequence, FrozenSet, Union
-from typeit import TypeConstructor
+
+from inflection import camelize
+from typeit import TypeConstructor, flags
 
 from pyrsistent import pmap, pvector
 from pyrsistent.typing import PVector, PMap
@@ -57,7 +59,7 @@ class ArraySchema(NamedTuple):
 class ResponseRef(NamedTuple):
     """ Values that are referenced as $response.body#/some/path
     """
-    operationId: str
+    operation_id: str
     parameters: Mapping[str, str]
 
 
@@ -68,7 +70,7 @@ class ObjectRef(NamedTuple):
 
 
 class ProductSchemaType(NamedTuple):
-    allOf: Sequence['SchemaType']  # type: ignore
+    all_of: Sequence['SchemaType']  # type: ignore
 
 
 SchemaType = Union[ObjectSchema, ArraySchema, ResponseRef, ObjectRef, ProductSchemaType]  # type: ignore
@@ -101,7 +103,7 @@ class Info(NamedTuple):
     title: str
     license: Optional[InfoLicense]
     contact: Optional[InfoContact]
-    termsOfService: str = ''
+    terms_of_service: str = ''
     description: str = ''
 
 
@@ -151,7 +153,7 @@ class Response(NamedTuple):
 
 class Method(NamedTuple):
     summary: str = ''
-    operationId: str = ''
+    operation_id: str = ''
     description: str = ''
     tags: FrozenSet[str] = frozenset()
     parameters: FrozenSet[MethodParameter] = frozenset()
@@ -187,5 +189,6 @@ overrides = {
     RefValue.ref: '$ref',
     ObjectRef.ref: '$ref'
 }
+_camelcase_attribute_names = flags.GlobalNameOverride(lambda x: camelize(x, uppercase_first_letter=False))
 
-parse_spec, serialize_spec = TypeConstructor & overrides ^ OpenAPI
+parse_spec, serialize_spec = TypeConstructor & overrides & _camelcase_attribute_names ^ OpenAPI
