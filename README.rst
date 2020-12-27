@@ -24,6 +24,22 @@ OpenAPI Type
 
 OpenAPI specification represented as a Python type. Use it to parse specifications written in JSON and YAML formats.
 
+.. code:: bash
+
+    pip install openapi-type
+
+
+.. code:: python
+
+    from openapi_type import OpenAPI, parse_spec, serialize_spec
+
+
+    spec: OpenAPI = parse_spec({
+        "your OpenAPI Spec as Python dictionary": "will be parsed into a proper Python type"
+    })
+    assert parse_spec(serialize_spec(spec)) == spec
+
+
 Cloning this repo
 -----------------
 
@@ -52,9 +68,9 @@ Test framework
 
 Run existing test suite with
 
-.. code::
+.. code:: bash
 
-   $ nix-shell --run "make test"
+   nix-shell --run "make test"
 
 
 Changelog
