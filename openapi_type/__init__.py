@@ -26,9 +26,11 @@ class StringValue(NamedTuple):
     enum: PVector[str] = pvector()
     example: str = ''
 
+Ref = NewType('Ref', str)
 
-class RefValue(NamedTuple):
-    ref: str
+
+class Reference(NamedTuple):
+    ref: Ref
 
 
 class ObjectValue(NamedTuple):
@@ -41,7 +43,7 @@ class ArrayValue(NamedTuple):
     items: 'SchemaValue'  # type: ignore
 
 
-SchemaValue = Union[StringValue, IntegerValue, RefValue, ObjectValue, ArrayValue]  # type: ignore
+SchemaValue = Union[StringValue, IntegerValue, Reference, ObjectValue, ArrayValue]  # type: ignore
 
 
 class ObjectSchema(NamedTuple):
@@ -73,7 +75,7 @@ class ProductSchemaType(NamedTuple):
     all_of: Sequence['SchemaType']  # type: ignore
 
 
-SchemaType = Union[ObjectSchema, ArraySchema, ResponseRef, ObjectRef, ProductSchemaType]  # type: ignore
+SchemaType = Union[ObjectSchema, ArraySchema, ResponseRef, Reference, ProductSchemaType]  # type: ignore
 
 
 class Components(NamedTuple):
@@ -81,8 +83,16 @@ class Components(NamedTuple):
     links: Mapping[str, SchemaType] = pmap()
 
 
+class ServerVar(NamedTuple):
+    default: str
+    enum: Sequence[str]
+    description: str = ''
+
+
 class Server(NamedTuple):
     url: str
+    description: str = ''
+    variables: Mapping[str, ServerVar] = pmap()
 
 
 class InfoLicense(NamedTuple):
@@ -112,7 +122,7 @@ class SpecFormat(Enum):
     V3_0_1 = '3.0.1'
 
 
-class MethodParameter(NamedTuple):
+class OperationParameter(NamedTuple):
     name: str
     in_: str
     schema: SchemaValue
@@ -125,10 +135,13 @@ HTTPCode = NewType('HTTPCode', str)
 HeaderName = NewType('HeaderName', str)
 
 
-class ResponseContentType(Enum):
+class MediaTypeTag(Enum):
     """ Response content type
     """
     JSON = 'application/json'
+    XML = 'application/xml'
+    TEXT = 'text/plain'
+    FORM_URLENCODED = 'application/x-www-form-urlencoded'
 
 
 class Header(NamedTuple):
@@ -138,38 +151,73 @@ class Header(NamedTuple):
     description: str = ''
 
 
-class ResponseContent(NamedTuple):
+class MediaType(NamedTuple):
+    """ https://swagger.io/specification/#media-type-object
+    """
     schema: PMap[str, Any] = pmap()
     example: PMap[str, Any] = pmap()
+    examples: Mapping[str, Any] = pmap()
+    encoding: Mapping[str, Any] = pmap()
 
 
 class Response(NamedTuple):
     """ Response of an endpoint
     """
-    content: PMap[ResponseContentType, ResponseContent] = pmap()
+    content: PMap[MediaTypeTag, MediaType] = pmap()
     headers: PMap[HeaderName, Header] = pmap()
     description: str = ''
 
 
-class Method(NamedTuple):
+class ExternalDoc(NamedTuple):
+    url: str
+    description: str = ''
+
+
+class RequestBody(NamedTuple):
+    """ https://swagger.io/specification/#request-body-object
+    """
+    content: Mapping[MediaTypeTag, Any]
+    description: str = ''
+    required: bool = False
+
+
+class Operation(NamedTuple):
+    """ https://swagger.io/specification/#operation-object
+    """
+    responses: Mapping[HTTPCode, Response]
+    external_docs: Optional[ExternalDoc]
     summary: str = ''
     operation_id: str = ''
+    parameters: FrozenSet[Union[OperationParameter, Reference]] = frozenset()
+    request_body: Union[None, RequestBody, Reference] = None
     description: str = ''
     tags: FrozenSet[str] = frozenset()
-    parameters: FrozenSet[MethodParameter] = frozenset()
-    responses: Mapping[HTTPCode, Response] = pmap()
     callbacks: Mapping[str, Mapping[str, Any]] = pmap()
 
 
-class Methods(NamedTuple):
+class PathItem(NamedTuple):
     """ Describes endpoint methods
     """
-    head: Optional[Method]
-    get: Optional[Method]
-    post: Optional[Method]
-    put: Optional[Method]
-    patch: Optional[Method]
-    delete: Optional[Method]
+    head: Optional[Operation]
+    get: Optional[Operation]
+    post: Optional[Operation]
+    put: Optional[Operation]
+    patch: Optional[Operation]
+    delete: Optional[Operation]
+    trace: Optional[Operation]
+    servers: Sequence[Server] = pvector()
+    ref: Ref = Ref('')
+    summary: str = ''
+    description: str = ''
+
+
+SecurityName = NewType('SecurityName', str)
+
+
+class SpecTag(NamedTuple):
+    name: str
+    external_docs: Optional[ExternalDoc]
+    description: str = ''
 
 
 class OpenAPI(NamedTuple):
@@ -179,15 +227,17 @@ class OpenAPI(NamedTuple):
     info: Info
     """ Various metadata
     """
-    paths: Mapping[str, Methods] = pmap()
+    paths: Mapping[str, PathItem]
     components: Components = Components(schemas=pmap(), links=pmap())
     servers: Sequence[Server] = pvector()
+    security: Sequence[Mapping[SecurityName, Sequence[str]]] = pvector()
+    tags: Sequence[SpecTag] = pvector()
 
 
 overrides = {
-    MethodParameter.in_: 'in',
-    RefValue.ref: '$ref',
-    ObjectRef.ref: '$ref'
+    OperationParameter.in_: 'in',
+    Reference.ref: '$ref',
+    PathItem.ref: '$ref',
 }
 _camelcase_attribute_names = flags.GlobalNameOverride(lambda x: camelize(x, uppercase_first_letter=False))
 
