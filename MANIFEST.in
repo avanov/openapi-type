@@ -1,5 +1,5 @@
 # https://docs.python.org/3/distutils/sourcedist.html#manifest
-include README.rst CHANGES LICENSE
+include README.rst CHANGELOG.rst LICENSE.txt
 recursive-include requirements *.txt
 recursive-include openapi_type
 recursive-include openapi_type py.typed
