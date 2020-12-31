@@ -4,13 +4,10 @@ from typing import Literal, NewType
 from typing import Mapping
 from typing import Any, NamedTuple, Optional, Sequence, FrozenSet, Union
 
-from inflection import camelize
-from typeit import TypeConstructor, flags
-
 from pyrsistent import pmap, pvector
 from pyrsistent.typing import PVector, PMap
 
-from .custom_types import TypeGenerator, MediaTypeTag
+from .custom_types import TypeGenerator, ContentTypeTag, Ref
 
 
 __all__ = ('parse_spec', 'serialize_spec', 'OpenAPI')
@@ -34,9 +31,6 @@ class BooleanValue(NamedTuple):
     type: Literal['boolean']
 
 
-Ref = NewType('Ref', str)
-
-
 class Reference(NamedTuple):
     ref: Ref
 
@@ -47,18 +41,35 @@ class ObjectValue(NamedTuple):
     xml: Mapping[str, Any] = pmap()
 
 
+class ObjectWithAdditionalProperties(NamedTuple):
+    type: Literal['object']
+    additional_properties: Mapping[str, Any]
+
+
 class ArrayValue(NamedTuple):
     type: Literal['array']
     items: 'SchemaValue'  # type: ignore
 
 
-SchemaValue = Union[StringValue, IntegerValue, BooleanValue, Reference, ObjectValue, ArrayValue]  # type: ignore
+SchemaValue = Union[StringValue,       # type: ignore
+                    IntegerValue,
+                    BooleanValue,
+                    Reference,
+                    ObjectValue,
+                    ArrayValue,
+                    ObjectWithAdditionalProperties]
 
 
 class ObjectSchema(NamedTuple):
     type: Literal['object']
     properties: Mapping[str, SchemaValue]
     required: FrozenSet[str] = frozenset()
+    description: str = ''
+
+
+class InlinedObjectSchema(NamedTuple):
+    properties: Mapping[str, SchemaValue]
+    required: FrozenSet[str]
     description: str = ''
 
 
@@ -84,7 +95,7 @@ class ProductSchemaType(NamedTuple):
     all_of: Sequence['SchemaType']  # type: ignore
 
 
-SchemaType = Union[StringValue, ObjectSchema, ArraySchema, ResponseRef, Reference, ProductSchemaType]  # type: ignore
+SchemaType = Union[StringValue, ObjectSchema, ArraySchema, ResponseRef, Reference, ProductSchemaType, ObjectWithAdditionalProperties, InlinedObjectSchema]  # type: ignore
 
 
 class Components(NamedTuple):
@@ -134,9 +145,16 @@ class SpecFormat(Enum):
     V3_0_2 = '3.0.2'
 
 
+class ParamLocation(Enum):
+    QUERY = 'query'
+    HEADER = 'header'
+    PATH = 'path'
+    COOKIE = 'cookie'
+
+
 class OperationParameter(NamedTuple):
     name: str
-    in_: str
+    in_: ParamLocation
     schema: SchemaValue
     required: bool = False
     description: str = ''
@@ -157,7 +175,7 @@ class Header(NamedTuple):
 class MediaType(NamedTuple):
     """ https://swagger.io/specification/#media-type-object
     """
-    schema: PMap[str, Any] = pmap()
+    schema: Optional[SchemaType] = None
     example: PMap[str, Any] = pmap()
     examples: Mapping[str, Any] = pmap()
     encoding: Mapping[str, Any] = pmap()
@@ -166,7 +184,7 @@ class MediaType(NamedTuple):
 class Response(NamedTuple):
     """ Response of an endpoint
     """
-    content: PMap[MediaTypeTag, MediaType] = pmap()
+    content: PMap[ContentTypeTag, MediaType] = pmap()
     headers: PMap[HeaderName, Header] = pmap()
     description: str = ''
 
@@ -179,7 +197,7 @@ class ExternalDoc(NamedTuple):
 class RequestBody(NamedTuple):
     """ https://swagger.io/specification/#request-body-object
     """
-    content: Mapping[MediaTypeTag, Any]
+    content: Mapping[ContentTypeTag, Any]
     description: str = ''
     required: bool = False
 
@@ -210,7 +228,7 @@ class PathItem(NamedTuple):
     delete: Optional[Operation]
     trace: Optional[Operation]
     servers: Sequence[Server] = pvector()
-    ref: Ref = Ref('')
+    ref: Optional[Ref] = None
     summary: str = ''
     description: str = ''
 
