@@ -62,7 +62,8 @@ class MediaTypeTagSchema(typeit.schema.primitives.Str):
         return super().serialize(node, ''.join(rv))
 
 
-TypeGenerator = typeit.TypeConstructor \
-              & MediaTypeTagSchema[MediaTypeTag] \
-              & typeit.flags.GlobalNameOverride(lambda x: camelize(x, uppercase_first_letter=False))
+TypeGenerator = ( typeit.TypeConstructor
+                & MediaTypeTagSchema[MediaTypeTag]  # type: ignore
+                & typeit.flags.GlobalNameOverride(lambda x: camelize(x, uppercase_first_letter=False))
+                )
 
