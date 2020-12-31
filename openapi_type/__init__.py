@@ -17,6 +17,7 @@ __all__ = ('parse_spec', 'serialize_spec', 'OpenAPI')
 class IntegerValue(NamedTuple):
     type: Literal['integer']
     format: str = ''
+    example: Optional[int] = None
 
 
 class StringValue(NamedTuple):
@@ -25,6 +26,11 @@ class StringValue(NamedTuple):
     description: str = ''
     enum: PVector[str] = pvector()
     example: str = ''
+
+
+class BooleanValue(NamedTuple):
+    type: Literal['boolean']
+
 
 Ref = NewType('Ref', str)
 
@@ -36,6 +42,7 @@ class Reference(NamedTuple):
 class ObjectValue(NamedTuple):
     type: Literal['object']
     properties: Mapping[str, 'SchemaValue']  # type: ignore
+    xml: Mapping[str, Any] = pmap()
 
 
 class ArrayValue(NamedTuple):
@@ -43,7 +50,7 @@ class ArrayValue(NamedTuple):
     items: 'SchemaValue'  # type: ignore
 
 
-SchemaValue = Union[StringValue, IntegerValue, Reference, ObjectValue, ArrayValue]  # type: ignore
+SchemaValue = Union[StringValue, IntegerValue, BooleanValue, Reference, ObjectValue, ArrayValue]  # type: ignore
 
 
 class ObjectSchema(NamedTuple):
@@ -81,6 +88,8 @@ SchemaType = Union[ObjectSchema, ArraySchema, ResponseRef, Reference, ProductSch
 class Components(NamedTuple):
     schemas: Mapping[str, SchemaType]
     links: Mapping[str, SchemaType] = pmap()
+    request_bodies: Mapping[str, Any] = pmap()
+    security_schemes: Mapping[str, Any] = pmap()
 
 
 class ServerVar(NamedTuple):
@@ -101,9 +110,9 @@ class InfoLicense(NamedTuple):
 
 
 class InfoContact(NamedTuple):
-    name: str
-    email: str
-    url: str
+    name: Optional[str]
+    email: Optional[str]
+    url: Optional[str]
 
 
 class Info(NamedTuple):
@@ -120,6 +129,7 @@ class Info(NamedTuple):
 class SpecFormat(Enum):
     V3_0_0 = '3.0.0'
     V3_0_1 = '3.0.1'
+    V3_0_2 = '3.0.2'
 
 
 class OperationParameter(NamedTuple):
@@ -193,6 +203,7 @@ class Operation(NamedTuple):
     description: str = ''
     tags: FrozenSet[str] = frozenset()
     callbacks: Mapping[str, Mapping[str, Any]] = pmap()
+    security: Optional[Any] = None
 
 
 class PathItem(NamedTuple):
@@ -232,6 +243,7 @@ class OpenAPI(NamedTuple):
     servers: Sequence[Server] = pvector()
     security: Sequence[Mapping[SecurityName, Sequence[str]]] = pvector()
     tags: Sequence[SpecTag] = pvector()
+    external_docs: Optional[ExternalDoc] = None
 
 
 overrides = {
