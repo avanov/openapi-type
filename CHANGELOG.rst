@@ -2,6 +2,11 @@
 CHANGELOG
 =========
 
+0.0.6
+=====
+
+* Support for Content Media Type with charset.
+
 0.0.2
 =====
 
