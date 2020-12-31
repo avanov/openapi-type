@@ -16,6 +16,6 @@ SPECS = [
 ] + [
     (x, CUSTOM_EXAMPLES_DIR / f"{x}.json") for x in [
         "one",
-        #"petstore"
+        "petstore"
     ]
 ]

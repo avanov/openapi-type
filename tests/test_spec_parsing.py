@@ -8,11 +8,6 @@ from .paths import SPECS
 
 @pt.mark.parametrize('name, spec_file', SPECS)
 def test_parsing(name, spec_file):
-    try:
-        oapi = load_spec(spec_file)
-    except Exception as e:
-        print(list(e))
-        raise
-
+    oapi = load_spec(spec_file)
     assert isinstance(oapi, OpenAPI)
     assert parse_spec(serialize_spec(oapi)) == oapi
