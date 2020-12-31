@@ -1,12 +1,12 @@
 from enum import Enum
-from typing import NewType, NamedTuple, Optional
+from typing import NewType, NamedTuple, Optional, Mapping, Sequence
 
 import typeit
 from inflection import camelize
 from typeit.schema import Invalid
 
 
-class MediaTypeFormat(Enum):
+class ContentTypeFormat(Enum):
     JSON = 'application/json'
     XML = 'application/xml'
     TEXT = 'text/plain'
@@ -17,14 +17,14 @@ class MediaTypeFormat(Enum):
 MediaTypeCharset = NewType('MediaTypeCharset', str)
 
 
-class MediaTypeTag(NamedTuple):
-    format: MediaTypeFormat
+class ContentTypeTag(NamedTuple):
+    format: ContentTypeFormat
     charset: Optional[MediaTypeCharset]
 
 
-class MediaTypeTagSchema(typeit.schema.primitives.Str):
-    def deserialize(self, node, cstruct: str) -> MediaTypeTag:
-        """ Converts input string value ``cstruct`` to ``MediaTypeTag``
+class ContentTypeTagSchema(typeit.schema.primitives.Str):
+    def deserialize(self, node, cstruct: str) -> ContentTypeTag:
+        """ Converts input string value ``cstruct`` to ``ContentTypeTag``
         """
         try:
             tag_str = super().deserialize(node, cstruct)
@@ -35,7 +35,7 @@ class MediaTypeTagSchema(typeit.schema.primitives.Str):
 
         media_format, *param = tag_str.split(';')
         try:
-            typed_format = MediaTypeFormat(media_format)
+            typed_format = ContentTypeFormat(media_format)
         except ValueError:
             raise Invalid(node, f"Unsupported Media Type format: {media_format}", media_format)
 
@@ -47,13 +47,13 @@ class MediaTypeTagSchema(typeit.schema.primitives.Str):
                 charset = None
         else:
             charset = None
-        return MediaTypeTag(
+        return ContentTypeTag(
             format=typed_format,
             charset=charset
         )
 
-    def serialize(self, node, appstruct: MediaTypeTag) -> str:
-        """ Converts ``MediaTypeTag`` back to string value suitable for JSON/YAML
+    def serialize(self, node, appstruct: ContentTypeTag) -> str:
+        """ Converts ``ContentTypeTag`` back to string value suitable for JSON/YAML
         """
         rv = [appstruct.format.value]
         if appstruct.charset:
@@ -62,8 +62,57 @@ class MediaTypeTagSchema(typeit.schema.primitives.Str):
         return super().serialize(node, ''.join(rv))
 
 
-TypeGenerator = ( typeit.TypeConstructor
-                & MediaTypeTagSchema[MediaTypeTag]  # type: ignore
-                & typeit.flags.GlobalNameOverride(lambda x: camelize(x, uppercase_first_letter=False))
-                )
+class RefTo(Enum):
+    SCHEMAS = '#/components/schemas/'
+    LINKS = '#/components/links/'
 
+
+class Ref(NamedTuple):
+    location: RefTo
+    name: str
+
+
+class RefSchema(typeit.schema.primitives.Str):
+    REF_PREFIX: Sequence[str] = ['#', 'components']
+    REF_LOCATIONS: Mapping[str, RefTo] = {
+        'schemas': RefTo.SCHEMAS,
+        'links': RefTo.LINKS,
+    }
+
+    def deserialize(self, node, cstruct: str) -> Ref:
+        """ Converts input string value ``cstruct`` to ``Ref``
+        """
+        try:
+            ref_str = super().deserialize(node, cstruct)
+        except Invalid as e:
+            error = Invalid(node, "Reference should be a string", cstruct)
+            error.add(e)
+            raise error
+
+        try:
+            *prefix, location, ref_name = ref_str.split('/')
+        except (ValueError, AttributeError):
+            raise Invalid(node, "Invalid reference format", ref_str)
+
+        if prefix != self.REF_PREFIX:
+            raise Invalid(node, f"Reference is not prefixed with {'/'.join(self.REF_PREFIX)}", ref_str)
+
+        try:
+            ref_location = self.REF_LOCATIONS[location]
+        except KeyError:
+            raise Invalid(node, "Unrecognised reference location", ref_str)
+
+        return Ref(ref_location, ref_name)
+
+    def serialize(self, node, appstruct: Ref) -> str:
+        """ Converts ``Ref`` back to string value suitable for JSON/YAML
+        """
+        rv = [appstruct.location.value, appstruct.name]
+        return super().serialize(node, ''.join(rv))
+
+
+TypeGenerator = (typeit.TypeConstructor
+                 & ContentTypeTagSchema[ContentTypeTag]  # type: ignore
+                 & RefSchema[Ref]  # type: ignore
+                 & typeit.flags.GlobalNameOverride(lambda x: camelize(x, uppercase_first_letter=False))
+                 )
