@@ -36,6 +36,7 @@ pkgs.stdenv.mkDerivation {
         libzip
         zlib
         which
+        jq
     ] ++ devLibs;
     shellHook = ''
         # set SOURCE_DATE_EPOCH so that we can use python wheels
