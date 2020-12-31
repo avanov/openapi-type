@@ -10,6 +10,8 @@ from typeit import TypeConstructor, flags
 from pyrsistent import pmap, pvector
 from pyrsistent.typing import PVector, PMap
 
+from .custom_types import TypeGenerator, MediaTypeTag
+
 
 __all__ = ('parse_spec', 'serialize_spec', 'OpenAPI')
 
@@ -145,16 +147,6 @@ HTTPCode = NewType('HTTPCode', str)
 HeaderName = NewType('HeaderName', str)
 
 
-class MediaTypeTag(Enum):
-    """ Response content type
-    """
-    JSON = 'application/json'
-    XML = 'application/xml'
-    TEXT = 'text/plain'
-    FORM_URLENCODED = 'application/x-www-form-urlencoded'
-    BINARY_STREAM = 'application/octet-stream'
-
-
 class Header(NamedTuple):
     """ response header
     """
@@ -252,8 +244,6 @@ overrides = {
     Reference.ref: '$ref',
     PathItem.ref: '$ref',
 }
-_camelcase_attribute_names = flags.GlobalNameOverride(lambda x: camelize(x, uppercase_first_letter=False))
 
-TypeGen = TypeConstructor & overrides & _camelcase_attribute_names
 
-parse_spec, serialize_spec = TypeGen ^ OpenAPI
+parse_spec, serialize_spec = TypeGenerator & overrides ^ OpenAPI

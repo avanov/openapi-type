@@ -59,7 +59,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "application/json;charset=utf-8": {
               "schema": {
                 "type": "object",
                 "properties": {
