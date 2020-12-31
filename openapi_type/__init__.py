@@ -152,6 +152,7 @@ class MediaTypeTag(Enum):
     XML = 'application/xml'
     TEXT = 'text/plain'
     FORM_URLENCODED = 'application/x-www-form-urlencoded'
+    BINARY_STREAM = 'application/octet-stream'
 
 
 class Header(NamedTuple):
@@ -253,4 +254,6 @@ overrides = {
 }
 _camelcase_attribute_names = flags.GlobalNameOverride(lambda x: camelize(x, uppercase_first_letter=False))
 
-parse_spec, serialize_spec = TypeConstructor & overrides & _camelcase_attribute_names ^ OpenAPI
+TypeGen = TypeConstructor & overrides & _camelcase_attribute_names
+
+parse_spec, serialize_spec = TypeGen ^ OpenAPI
