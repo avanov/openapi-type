@@ -84,7 +84,7 @@ class ProductSchemaType(NamedTuple):
     all_of: Sequence['SchemaType']  # type: ignore
 
 
-SchemaType = Union[ObjectSchema, ArraySchema, ResponseRef, Reference, ProductSchemaType]  # type: ignore
+SchemaType = Union[StringValue, ObjectSchema, ArraySchema, ResponseRef, Reference, ProductSchemaType]  # type: ignore
 
 
 class Components(NamedTuple):
