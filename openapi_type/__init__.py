@@ -22,6 +22,13 @@ class IntegerValue(NamedTuple):
     maximum: Optional[int] = None
 
 
+class FloatValue(NamedTuple):
+    type: Literal['number']
+    format: str = ''
+    example: Optional[float] = None
+    default: Optional[float] = None
+
+
 class StringValue(NamedTuple):
     type: Literal['string']
     format: str = ''
@@ -61,6 +68,7 @@ class ArrayValue(NamedTuple):
 
 SchemaValue = Union[StringValue,       # type: ignore
                     IntegerValue,
+                    FloatValue,
                     BooleanValue,
                     Reference,
                     ObjectValue,
