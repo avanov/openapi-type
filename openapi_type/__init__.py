@@ -36,9 +36,12 @@ class Reference(NamedTuple):
     ref: Ref
 
 
+RecursiveAttrs = Mapping[str, 'SchemaValue']  # type: ignore
+
+
 class ObjectValue(NamedTuple):
     type: Literal['object']
-    properties: Mapping[str, 'SchemaValue']  # type: ignore
+    properties: RecursiveAttrs
     xml: Mapping[str, Any] = pmap()
 
 
@@ -63,13 +66,13 @@ SchemaValue = Union[StringValue,       # type: ignore
 
 class ObjectSchema(NamedTuple):
     type: Literal['object']
-    properties: Mapping[str, SchemaValue]
+    properties: RecursiveAttrs
     required: FrozenSet[str] = frozenset()
     description: str = ''
 
 
 class InlinedObjectSchema(NamedTuple):
-    properties: Mapping[str, SchemaValue]
+    properties: RecursiveAttrs
     required: FrozenSet[str]
     description: str = ''
 
