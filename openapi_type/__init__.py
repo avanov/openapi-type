@@ -24,6 +24,7 @@ class StringValue(NamedTuple):
     format: str = ''
     description: str = ''
     enum: PVector[str] = pvector()
+    default: Optional[str] = None
     example: str = ''
 
 
