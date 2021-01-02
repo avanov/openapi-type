@@ -17,6 +17,9 @@ class IntegerValue(NamedTuple):
     type: Literal['integer']
     format: str = ''
     example: Optional[int] = None
+    default: Optional[int] = None
+    minimum: Optional[int] = None
+    maximum: Optional[int] = None
 
 
 class StringValue(NamedTuple):
@@ -30,6 +33,7 @@ class StringValue(NamedTuple):
 
 class BooleanValue(NamedTuple):
     type: Literal['boolean']
+    default: Optional[bool] = None
 
 
 class Reference(NamedTuple):
