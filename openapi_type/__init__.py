@@ -89,11 +89,6 @@ class InlinedObjectSchema(NamedTuple):
     description: str = ''
 
 
-class ArraySchema(NamedTuple):
-    type: Literal['array']
-    items: SchemaValue
-
-
 class ResponseRef(NamedTuple):
     """ Values that are referenced as $response.body#/some/path
     """
@@ -111,7 +106,15 @@ class ProductSchemaType(NamedTuple):
     all_of: Sequence['SchemaType']  # type: ignore
 
 
-SchemaType = Union[StringValue, ObjectSchema, ArraySchema, ResponseRef, Reference, ProductSchemaType, ObjectWithAdditionalProperties, InlinedObjectSchema]  # type: ignore
+SchemaType = Union[ StringValue    # type: ignore
+                  , ObjectSchema
+                  , ArrayValue
+                  , ResponseRef
+                  , Reference
+                  , ProductSchemaType
+                  , ObjectWithAdditionalProperties
+                  , InlinedObjectSchema
+                  ]
 
 
 class Components(NamedTuple):
