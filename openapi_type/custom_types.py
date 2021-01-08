@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import NewType, NamedTuple, Optional, Mapping, Sequence
+from typing import NewType, NamedTuple, Optional, Mapping, Sequence, Any
 
 import typeit
 from inflection import camelize
@@ -12,6 +12,10 @@ class ContentTypeFormat(Enum):
     TEXT = 'text/plain'
     FORM_URLENCODED = 'application/x-www-form-urlencoded'
     BINARY_STREAM = 'application/octet-stream'
+    EVENT_STREAM = 'text/event-stream'
+    """ server-side events
+    """
+    ANYTHING = '*/*'
 
 
 MediaTypeCharset = NewType('MediaTypeCharset', str)
@@ -111,8 +115,40 @@ class RefSchema(typeit.schema.primitives.Str):
         return super().serialize(node, ''.join(rv))
 
 
+class EmptyValue(NamedTuple):
+    """ Sometimes spec contains schemas like:
+    {
+        "type": "array",
+        "items": {}
+    }
+
+    In that case we need a strict type that would check that its serialized representation
+    exactly matches the empty schema value {}. This object serves that purpose.
+    """
+    pass
+
+
+_empty = EmptyValue()
+
+
+class EmptyValueSchema(typeit.schema.primitives.col.SchemaType, metaclass=typeit.schema.primitives.SubscriptableSchemaTypeM):
+    def deserialize(self, node, cstruct: Any) -> EmptyValue:
+        """ Converts input string value ``cstruct`` to ``EmptyValue``
+        """
+        if cstruct == {}:
+            error = Invalid(node, "Not an empty type", cstruct)
+            raise error
+        return _empty
+
+    def serialize(self, node, appstruct: EmptyValue) -> Mapping[Any, Any]:
+        """ Converts ``EmptyValue`` back to a value suitable for JSON/YAML
+        """
+        return {}
+
+
 TypeGenerator = (typeit.TypeConstructor
                  & ContentTypeTagSchema[ContentTypeTag]  # type: ignore
-                 & RefSchema[Ref]  # type: ignore
+                 & RefSchema[Ref]                        # type: ignore
+                 & EmptyValueSchema[EmptyValue]          # type: ignore
                  & typeit.flags.GlobalNameOverride(lambda x: camelize(x, uppercase_first_letter=False))
                  )

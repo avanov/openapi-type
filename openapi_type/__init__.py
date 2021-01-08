@@ -7,7 +7,7 @@ from typing import Any, NamedTuple, Optional, Sequence, FrozenSet, Union
 from pyrsistent import pmap, pvector
 from pyrsistent.typing import PVector, PMap
 
-from .custom_types import TypeGenerator, ContentTypeTag, Ref
+from .custom_types import TypeGenerator, ContentTypeTag, Ref, EmptyValue
 
 
 __all__ = ('parse_spec', 'serialize_spec', 'OpenAPI')
@@ -35,6 +35,7 @@ class StringValue(NamedTuple):
     description: str = ''
     enum: PVector[str] = pvector()
     default: Optional[str] = None
+    pattern: Optional[str] = None
     example: str = ''
 
 
@@ -47,13 +48,7 @@ class Reference(NamedTuple):
     ref: Ref
 
 
-RecursiveAttrs = Mapping[str, 'SchemaValue']  # type: ignore
-
-
-class ObjectValue(NamedTuple):
-    type: Literal['object']
-    properties: RecursiveAttrs
-    xml: Mapping[str, Any] = pmap()
+RecursiveAttrs = Mapping[str, 'SchemaType']  # type: ignore
 
 
 class ObjectWithAdditionalProperties(NamedTuple):
@@ -63,27 +58,18 @@ class ObjectWithAdditionalProperties(NamedTuple):
 
 class ArrayValue(NamedTuple):
     type: Literal['array']
-    items: 'SchemaValue'  # type: ignore
+    items: 'SchemaType'  # type: ignore
 
 
-SchemaValue = Union[StringValue,       # type: ignore
-                    IntegerValue,
-                    FloatValue,
-                    BooleanValue,
-                    Reference,
-                    ObjectValue,
-                    ArrayValue,
-                    ObjectWithAdditionalProperties]
-
-
-class ObjectSchema(NamedTuple):
+class ObjectValue(NamedTuple):
     type: Literal['object']
     properties: RecursiveAttrs
     required: FrozenSet[str] = frozenset()
     description: str = ''
+    xml: Mapping[str, Any] = pmap()
 
 
-class InlinedObjectSchema(NamedTuple):
+class InlinedObjectValue(NamedTuple):
     properties: RecursiveAttrs
     required: FrozenSet[str]
     description: str = ''
@@ -106,14 +92,28 @@ class ProductSchemaType(NamedTuple):
     all_of: Sequence['SchemaType']  # type: ignore
 
 
-SchemaType = Union[ StringValue    # type: ignore
-                  , ObjectSchema
+class UnionSchemaTypeAny(NamedTuple):
+    any_of: Sequence['SchemaType']  # type: ignore
+
+
+class UnionSchemaTypeOne(NamedTuple):
+    one_of: Sequence['SchemaType']  # type: ignore
+
+
+SchemaType = Union[ StringValue  # type: ignore
+                  , IntegerValue
+                  , FloatValue
+                  , BooleanValue
+                  , ObjectValue
                   , ArrayValue
                   , ResponseRef
                   , Reference
                   , ProductSchemaType
+                  , UnionSchemaTypeAny
+                  , UnionSchemaTypeOne
                   , ObjectWithAdditionalProperties
-                  , InlinedObjectSchema
+                  , InlinedObjectValue
+                  , EmptyValue
                   ]
 
 
@@ -171,13 +171,28 @@ class ParamLocation(Enum):
     COOKIE = 'cookie'
 
 
+class ParamStyle(Enum):
+    """
+    * https://swagger.io/specification/#style-values
+    * https://swagger.io/specification/#style-examples
+    """
+    FORM = 'form'
+    SIMPLE = 'simple'
+    MATRIX = 'matrix'
+    LABEL = 'label'
+    SPACE_DELIMITED = 'spaceDelimited'
+    PIPE_DELIMITED = 'pipeDelimited'
+    DEEP_OBJECT = 'deepObject'
+
+
 class OperationParameter(NamedTuple):
     name: str
     in_: ParamLocation
-    schema: SchemaValue
+    schema: SchemaType
     required: bool = False
     description: str = ''
-    style: str = ''
+    style: Optional[ParamStyle] = None
+    explode: Optional[bool] = None
 
 
 HTTPCode = NewType('HTTPCode', str)
@@ -187,7 +202,7 @@ HeaderName = NewType('HeaderName', str)
 class Header(NamedTuple):
     """ response header
     """
-    schema: SchemaValue
+    schema: SchemaType
     description: str = ''
 
 
@@ -195,7 +210,7 @@ class MediaType(NamedTuple):
     """ https://swagger.io/specification/#media-type-object
     """
     schema: Optional[SchemaType] = None
-    example: PMap[str, Any] = pmap()
+    example: Union[None, str, PMap[str, Any]] = None
     examples: Mapping[str, Any] = pmap()
     encoding: Mapping[str, Any] = pmap()
 

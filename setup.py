@@ -60,4 +60,9 @@ setup(name='openapi-type',
       tests_require=['pytest', 'coverage'],
       install_requires=requirements(here / 'requirements' / 'minimal.txt'),
       extras_require=extras_require(),
+      entry_points={
+          'console_scripts': [
+              'openapi-type = openapi_type.cli:main'
+          ],
+      }
     )
