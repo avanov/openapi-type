@@ -131,7 +131,7 @@ class EmptyValue(NamedTuple):
 _empty = EmptyValue()
 
 
-class EmptyValueSchema(typeit.schema.primitives.col.SchemaType, metaclass=typeit.schema.primitives.SubscriptableSchemaTypeM):
+class EmptyValueSchema(typeit.schema.meta.SchemaType):
     def deserialize(self, node, cstruct: Any) -> EmptyValue:
         """ Converts input string value ``cstruct`` to ``EmptyValue``
         """
