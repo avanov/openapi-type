@@ -38,7 +38,7 @@ with (here / 'README.rst').open() as f:
 # ----------------------------
 
 setup(name='openapi-type',
-      version='0.0.12',
+      version='0.0.13',
       description='OpenAPI Type',
       long_description=README,
       classifiers=[
@@ -60,4 +60,9 @@ setup(name='openapi-type',
       tests_require=['pytest', 'coverage'],
       install_requires=requirements(here / 'requirements' / 'minimal.txt'),
       extras_require=extras_require(),
+      entry_points={
+          'console_scripts': [
+              'openapi-type = openapi_type.cli:main'
+          ],
+      }
     )
