@@ -7,7 +7,7 @@ from typing import Any, NamedTuple, Optional, Sequence, FrozenSet, Union
 from pyrsistent import pmap, pvector
 from pyrsistent.typing import PVector, PMap
 
-from .custom_types import TypeGenerator, ContentTypeTag, Ref, EmptyValue
+from .custom_types import *
 
 
 __all__ = ('parse_spec', 'serialize_spec', 'OpenAPI')
@@ -228,10 +228,14 @@ class ExternalDoc(NamedTuple):
     description: str = ''
 
 
+class RequestBodySchema(NamedTuple):
+    schema: SchemaType
+
+
 class RequestBody(NamedTuple):
     """ https://swagger.io/specification/#request-body-object
     """
-    content: Mapping[ContentTypeTag, Any]
+    content: Mapping[ContentTypeTag, RequestBodySchema]
     description: str = ''
     required: bool = False
 
