@@ -59,6 +59,7 @@ class ObjectWithAdditionalProperties(NamedTuple):
 class ArrayValue(NamedTuple):
     type: Literal['array']
     items: 'SchemaType'  # type: ignore
+    description: str = ''
 
 
 class ObjectValue(NamedTuple):
