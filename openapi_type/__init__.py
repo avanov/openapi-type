@@ -53,7 +53,7 @@ RecursiveAttrs = Mapping[str, 'SchemaType']  # type: ignore
 
 class ObjectWithAdditionalProperties(NamedTuple):
     type: Literal['object']
-    additional_properties: Mapping[str, Any]
+    additional_properties: Optional['SchemaType'] = None  # type: ignore
 
 
 class ArrayValue(NamedTuple):
