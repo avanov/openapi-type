@@ -142,9 +142,9 @@ _empty = EmptyValue()
 
 class EmptyValueSchema(typeit.schema.meta.SchemaType):
     def deserialize(self, node, cstruct: Any) -> EmptyValue:
-        """ Converts input string value ``cstruct`` to ``EmptyValue``
+        """ Converts input value ``cstruct`` to ``EmptyValue``
         """
-        if cstruct == {}:
+        if cstruct != {}:
             error = Invalid(node, "Not an empty type", cstruct)
             raise error
         return _empty
