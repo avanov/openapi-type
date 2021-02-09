@@ -76,8 +76,11 @@ class ContentTypeTagSchema(typeit.schema.primitives.Str):
 
 
 class RefTo(Enum):
-    SCHEMAS = '#/components/schemas/'
-    LINKS = '#/components/links/'
+    SCHEMAS   = '#/components/schemas/'
+    LINKS     = '#/components/links/'
+    PARAMS    = '#/components/parameters/'
+    RESPONSES = '#/components/responses/'
+    HEADERS   = '#/components/headers/'
 
 
 class Ref(NamedTuple):
@@ -90,6 +93,9 @@ class RefSchema(typeit.schema.primitives.Str):
     REF_LOCATIONS: Mapping[str, RefTo] = {
         'schemas': RefTo.SCHEMAS,
         'links': RefTo.LINKS,
+        'parameters': RefTo.PARAMS,
+        'responses': RefTo.RESPONSES,
+        'headers': RefTo.HEADERS,
     }
 
     def deserialize(self, node, cstruct: str) -> Ref:
@@ -113,7 +119,7 @@ class RefSchema(typeit.schema.primitives.Str):
         try:
             ref_location = self.REF_LOCATIONS[location]
         except KeyError:
-            raise Invalid(node, "Unrecognised reference location", ref_str)
+            raise Invalid(node, f"Unrecognised reference location '{location}'", ref_str)
 
         return Ref(ref_location, ref_name)
 

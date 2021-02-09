@@ -2,6 +2,15 @@
 CHANGELOG
 =========
 
+0.0.19
+======
+
+* Support for ``#/components/responses``
+* Support for ``#/components/headers``
+* Support for ``#/components/parameters``
+* ``ObjectWithAdditionalProperties`` supports boolean value
+* Support for header schemas referenced through ``$ref``
+
 0.0.6
 =====
 

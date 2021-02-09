@@ -52,8 +52,11 @@ RecursiveAttrs = Mapping[str, 'SchemaType']  # type: ignore
 
 
 class ObjectWithAdditionalProperties(NamedTuple):
+    """ Represents a free-form object
+    https://swagger.io/docs/specification/data-models/dictionaries/#free-form
+    """
     type: Literal['object']
-    additional_properties: Optional['SchemaType'] = None  # type: ignore
+    additional_properties: Union[None, bool, 'SchemaType'] = None  # type: ignore
 
 
 class ArrayValue(NamedTuple):
@@ -220,7 +223,7 @@ class Response(NamedTuple):
     """ Response of an endpoint
     """
     content: PMap[ContentTypeTag, MediaType] = pmap()
-    headers: PMap[HeaderName, Header] = pmap()
+    headers: PMap[HeaderName, Union[Header, Reference]] = pmap()
     description: str = ''
 
 
