@@ -121,9 +121,71 @@ SchemaType = Union[ StringValue  # type: ignore
                   ]
 
 
+class ParamLocation(Enum):
+    QUERY = 'query'
+    HEADER = 'header'
+    PATH = 'path'
+    COOKIE = 'cookie'
+
+
+class ParamStyle(Enum):
+    """
+    * https://swagger.io/specification/#style-values
+    * https://swagger.io/specification/#style-examples
+    """
+    FORM = 'form'
+    SIMPLE = 'simple'
+    MATRIX = 'matrix'
+    LABEL = 'label'
+    SPACE_DELIMITED = 'spaceDelimited'
+    PIPE_DELIMITED = 'pipeDelimited'
+    DEEP_OBJECT = 'deepObject'
+
+
+class OperationParameter(NamedTuple):
+    name: str
+    in_: ParamLocation
+    schema: SchemaType
+    required: bool = False
+    description: str = ''
+    style: Optional[ParamStyle] = None
+    explode: Optional[bool] = None
+
+
+class Header(NamedTuple):
+    """ response header
+    """
+    schema: SchemaType
+    description: str = ''
+
+
+HTTPCode = NewType('HTTPCode', str)
+HeaderName = NewType('HeaderName', str)
+
+
+class MediaType(NamedTuple):
+    """ https://swagger.io/specification/#media-type-object
+    """
+    schema: Optional[SchemaType] = None
+    example: Union[None, str, PMap[str, Any]] = None
+    examples: Mapping[str, Any] = pmap()
+    encoding: Mapping[str, Any] = pmap()
+
+
+class Response(NamedTuple):
+    """ Response of an endpoint
+    """
+    content: PMap[ContentTypeTag, MediaType] = pmap()
+    headers: PMap[HeaderName, Union[Header, Reference]] = pmap()
+    description: str = ''
+
+
 class Components(NamedTuple):
     schemas: Mapping[str, SchemaType]
     links: Mapping[str, SchemaType] = pmap()
+    parameters: Mapping[str, OperationParameter] = pmap()
+    responses: Mapping[str, Response] = pmap()
+    headers: Mapping[str, Header] = pmap()
     request_bodies: Mapping[str, Any] = pmap()
     security_schemes: Mapping[str, Any] = pmap()
 
@@ -166,65 +228,6 @@ class SpecFormat(Enum):
     V3_0_0 = '3.0.0'
     V3_0_1 = '3.0.1'
     V3_0_2 = '3.0.2'
-
-
-class ParamLocation(Enum):
-    QUERY = 'query'
-    HEADER = 'header'
-    PATH = 'path'
-    COOKIE = 'cookie'
-
-
-class ParamStyle(Enum):
-    """
-    * https://swagger.io/specification/#style-values
-    * https://swagger.io/specification/#style-examples
-    """
-    FORM = 'form'
-    SIMPLE = 'simple'
-    MATRIX = 'matrix'
-    LABEL = 'label'
-    SPACE_DELIMITED = 'spaceDelimited'
-    PIPE_DELIMITED = 'pipeDelimited'
-    DEEP_OBJECT = 'deepObject'
-
-
-class OperationParameter(NamedTuple):
-    name: str
-    in_: ParamLocation
-    schema: SchemaType
-    required: bool = False
-    description: str = ''
-    style: Optional[ParamStyle] = None
-    explode: Optional[bool] = None
-
-
-HTTPCode = NewType('HTTPCode', str)
-HeaderName = NewType('HeaderName', str)
-
-
-class Header(NamedTuple):
-    """ response header
-    """
-    schema: SchemaType
-    description: str = ''
-
-
-class MediaType(NamedTuple):
-    """ https://swagger.io/specification/#media-type-object
-    """
-    schema: Optional[SchemaType] = None
-    example: Union[None, str, PMap[str, Any]] = None
-    examples: Mapping[str, Any] = pmap()
-    encoding: Mapping[str, Any] = pmap()
-
-
-class Response(NamedTuple):
-    """ Response of an endpoint
-    """
-    content: PMap[ContentTypeTag, MediaType] = pmap()
-    headers: PMap[HeaderName, Union[Header, Reference]] = pmap()
-    description: str = ''
 
 
 class ExternalDoc(NamedTuple):
