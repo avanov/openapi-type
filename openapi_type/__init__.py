@@ -250,7 +250,7 @@ class RequestBody(NamedTuple):
 class Operation(NamedTuple):
     """ https://swagger.io/specification/#operation-object
     """
-    responses: Mapping[HTTPCode, Response]
+    responses: Mapping[HTTPCode, Union[Response, Reference]]
     external_docs: Optional[ExternalDoc]
     summary: str = ''
     operation_id: str = ''
