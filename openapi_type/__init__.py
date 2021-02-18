@@ -180,12 +180,17 @@ class Response(NamedTuple):
     description: str = ''
 
 
+HeaderTypeName   = NewType('HeaderTypeName', str)
+ParamTypeName    = NewType('ParamTypeName', str)
+ResponseTypeName = NewType('ResponseTypeName', str)
+
+
 class Components(NamedTuple):
     schemas: Mapping[str, SchemaType]
     links: Mapping[str, SchemaType] = pmap()
-    parameters: Mapping[str, OperationParameter] = pmap()
-    responses: Mapping[str, Response] = pmap()
-    headers: Mapping[str, Header] = pmap()
+    parameters: Mapping[ParamTypeName, OperationParameter] = pmap()
+    responses: Mapping[ResponseTypeName, Response] = pmap()
+    headers: Mapping[HeaderTypeName, Header] = pmap()
     request_bodies: Mapping[str, Any] = pmap()
     security_schemes: Mapping[str, Any] = pmap()
 
@@ -250,7 +255,7 @@ class RequestBody(NamedTuple):
 class Operation(NamedTuple):
     """ https://swagger.io/specification/#operation-object
     """
-    responses: Mapping[HTTPCode, Union[Response, Reference]]
+    responses: Mapping[HTTPCode, Union[Reference, Response]]  # union order matters
     external_docs: Optional[ExternalDoc]
     summary: str = ''
     operation_id: str = ''
