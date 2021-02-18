@@ -39,6 +39,17 @@ OpenAPI specification represented as a Python type. Use it to parse specificatio
     })
     assert parse_spec(serialize_spec(spec)) == spec
 
+.. code:: bash
+
+    $ curl -s https://petstore3.swagger.io/api/v3/openapi.json | openapi-type check
+    Successfully parsed.
+
+
+Codegen
+-------
+
+If you are looking for a complete client code generator, consider `openapi-client-generator <https://github.com/avanov/openapi-client-generator>`_
+that uses this library under the hood.
 
 Cloning this repo
 -----------------
