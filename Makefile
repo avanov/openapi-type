@@ -12,7 +12,7 @@ DIST_DIR                  := $(PROJECT_ROOT)/dist
 PROJECT=openapi_type
 
 test: typecheck
-	pytest -s  --cov=openapi_type $(PROJECT_ROOT)/tests
+	pytest -s  --cov=openapi_type --cov-report xml $(PROJECT_ROOT)/tests
 
 typecheck:
 	mypy --config-file setup.cfg --package $(PROJECT_NAME)

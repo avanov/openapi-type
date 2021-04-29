@@ -2,6 +2,12 @@
 CHANGELOG
 =========
 
+0.1.0
+======
+
+* ``ContentTypeFormat`` is redefined as a new type of ``str`` (used to be a strict Enum)
+  for allowing non-common yet valid type representations.
+
 0.0.19
 ======
 

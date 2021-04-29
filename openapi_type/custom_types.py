@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import NewType, NamedTuple, Optional, Mapping, Sequence, Any
+from typing import NewType, NamedTuple, Optional, Mapping, Sequence, Any, List
 
 import typeit
 from inflection import camelize
@@ -9,24 +9,12 @@ from typeit.schema import Invalid
 __all__ = (
     'TypeGenerator',
     'ContentTypeTag',
-    'ContentTypeFormat',
     'Ref',
     'EmptyValue',
 )
 
 
-class ContentTypeFormat(Enum):
-    JSON = 'application/json'
-    XML = 'application/xml'
-    TEXT = 'text/plain'
-    FORM_URLENCODED = 'application/x-www-form-urlencoded'
-    BINARY_STREAM = 'application/octet-stream'
-    EVENT_STREAM = 'text/event-stream'
-    """ server-side events
-    """
-    ANYTHING = '*/*'
-
-
+ContentTypeFormat = NewType('ContentTypeFormat', str)
 MediaTypeCharset = NewType('MediaTypeCharset', str)
 
 
@@ -47,10 +35,7 @@ class ContentTypeTagSchema(typeit.schema.primitives.Str):
             raise error
 
         media_format, *param = tag_str.split(';')
-        try:
-            typed_format = ContentTypeFormat(media_format)
-        except ValueError:
-            raise Invalid(node, f"Unsupported Media Type format: {media_format}", media_format)
+        typed_format = ContentTypeFormat(media_format)
 
         if param:
             param = [x for x in param[0].split('charset=') if x.strip()]
@@ -68,7 +53,7 @@ class ContentTypeTagSchema(typeit.schema.primitives.Str):
     def serialize(self, node, appstruct: ContentTypeTag) -> str:
         """ Converts ``ContentTypeTag`` back to string value suitable for JSON/YAML
         """
-        rv = [appstruct.format.value]
+        rv: List = [appstruct.format]
         if appstruct.charset:
             rv.extend([';', "charset=", appstruct.charset])
 
@@ -76,11 +61,15 @@ class ContentTypeTagSchema(typeit.schema.primitives.Str):
 
 
 class RefTo(Enum):
-    SCHEMAS   = '#/components/schemas/'
-    LINKS     = '#/components/links/'
-    PARAMS    = '#/components/parameters/'
-    RESPONSES = '#/components/responses/'
-    HEADERS   = '#/components/headers/'
+    SCHEMAS          = '#/components/schemas/'
+    LINKS            = '#/components/links/'
+    PARAMS           = '#/components/parameters/'
+    RESPONSES        = '#/components/responses/'
+    HEADERS          = '#/components/headers/'
+    EXAMPLES         = '#/components/examples/'
+    REQUEST_BODIES   = '#/components/requestBodies/'
+    SECURITY_SCHEMES = '#/components/securitySchemes/'
+    CALLBACKS        = '#/components/callbacks/'
 
 
 class Ref(NamedTuple):
@@ -96,6 +85,10 @@ class RefSchema(typeit.schema.primitives.Str):
         'parameters': RefTo.PARAMS,
         'responses': RefTo.RESPONSES,
         'headers': RefTo.HEADERS,
+        'examples': RefTo.EXAMPLES,
+        'requestBodies': RefTo.REQUEST_BODIES,
+        'securitySchemes': RefTo.SECURITY_SCHEMES,
+        'callbacks': RefTo.CALLBACKS,
     }
 
     def deserialize(self, node, cstruct: str) -> Ref:
