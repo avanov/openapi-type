@@ -37,6 +37,10 @@ jobs:
     needs: tests
     runs-on: ubuntu-latest
     steps:
+      - uses: cachix/install-nix-action@v12
+        with:
+          install_url: https://releases.nixos.org/nix/nix-2.3.10/install
+          extra_nix_config: "system-features = benchmark kvm"
       - name: Coveralls [finalize]
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
