@@ -24,10 +24,21 @@ jobs:
           nix-shell --argstr pyVersion ${{ matrix.python-version }} --run \
           "pip install -e . && pip install -r requirements/test.txt && pip install -r requirements/extras/third_party.txt && make test"
 
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          flag-name: python${{ matrix.python-version }}
-          parallel: true
-          path-to-lcov:  ./coverage.xml
+      - name: Coveralls [upload]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_FLAG_NAME: python${{ matrix.python-version }}
+          COVERALLS_PARALLEL: true
+        run: |
+          nix-shell --argstr pyVersion ${{ matrix.python-version }} --arg isDevEnv false --run "coveralls"
+
+  coveralls:
+    name: Coveralls [finalize]
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls [finalize]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          nix-shell --argstr pyVersion ${{ matrix.python-version }} --arg isDevEnv false --run "coveralls --finish"
