@@ -25,7 +25,8 @@ jobs:
           "pip install -e . && pip install -r requirements/test.txt && pip install -r requirements/extras/third_party.txt && make test"
 
       - name: Coveralls
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          nix-shell --argstr pyVersion ${{ matrix.python-version }} --arg isDevEnv false --run "coveralls"
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: python${{ matrix.python-version }}
+          parallel: true
