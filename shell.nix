@@ -12,7 +12,7 @@ let
 
     python = pkgs."python${pyVersion}";
     pythonPkgs = pkgs."python${pyVersion}Packages";
-    devLibs = if isDevEnv then [ pythonPkgs.twine pythonPkgs.wheel ] else [ pythonPkgs.coveralls ];
+    devLibs = if isDevEnv then [ pythonPkgs.twine pythonPkgs.wheel ] else [ ];
 in
 
 # Make a new "derivation" that represents our shell
