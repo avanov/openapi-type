@@ -2,10 +2,10 @@
     pkgs ? import (builtins.fetchTarball {
              # Descriptive name to make the store path easier to identify
              name = "openapi-type-nixpkgs";
-             # Commit hash for nixos-unstable as of 2019-10-27
-             url = https://github.com/NixOS/nixpkgs/archive/b67ba0bfcc714453cdeb8d713e35751eb8b4c8f4.tar.gz;
+             # Commit hash for nixos-unstable as of 2021-04-29
+             url = https://github.com/NixOS/nixpkgs/archive/f4c4ddae041241dc0c9d5628038826103958fdfc.tar.gz;
              # Hash obtained using `nix-prefetch-url --unpack <url>`
-             sha256 = "0bjcdml9vbrx0r0kz9ic48lpnj4ah1cjhqsw7p0ydmz7dvrq702y";
+             sha256 = "192bnsjrccvix9kd1cg895alghpdd73hdpis2s03b1p2rn1y2pkp";
            }) {}
 ,   pyVersion ? "39"
 ,   isDevEnv  ? true
