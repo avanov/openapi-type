@@ -38,7 +38,7 @@ with (here / 'README.rst').open() as f:
 # ----------------------------
 
 setup(name='openapi-type',
-      version='0.1.0',
+      version='0.2.0',
       description='OpenAPI Type',
       long_description=README,
       classifiers=[
