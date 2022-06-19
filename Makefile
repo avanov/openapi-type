@@ -21,3 +21,7 @@ publish: test
 	rm -rf $(BUILD_DIR) $(DIST_DIR)
 	python $(PROJECT_ROOT)/setup.py sdist bdist_wheel
 	twine upload $(DIST_DIR)/*
+
+shell:
+	# pyopenssl on m1 issue https://github.com/NixOS/nixpkgs/issues/175875
+	NIXPKGS_ALLOW_BROKEN=1 nix-shell $(PROJECT_ROOT)/shell.nix
